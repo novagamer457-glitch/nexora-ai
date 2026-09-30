@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: nexora-postgres
+    environment:
+      POSTGRES_USER: nexora_user
+      POSTGRES_PASSWORD: nexora_password
+      POSTGRES_DB: nexora_ai
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexora_user -d nexora_ai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nexora-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: nexora-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nexora-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  nexora-network:
+    driver: bridge
